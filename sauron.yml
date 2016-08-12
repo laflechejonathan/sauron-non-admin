@@ -1,0 +1,47 @@
+
+end_state: EndState
+state_machine:
+  EndState:
+    status_checks: []
+    on_success:
+      transition_state: EndState
+    on_failure:
+      transition_state: EndState
+  CodeReviewState:
+    status_checks:
+      - merge-label:
+          label_name: Ship It!
+    on_failure:
+      transition_state: CodeReviewState
+    on_success:
+      transition_state: QueuedState
+  QueuedState:
+    status_checks:
+      - merged: null
+    on_failure:
+      transition_state: CodeReviewState
+    on_success:
+      transition_state: ManualGateState
+  ManualGateState:
+    is_manual: true
+    status_checks:
+      - manual-gate: null
+    on_failure:
+      transition_state: null
+    on_success:
+      transition_state: DeployState_Prod
+  DeployState_Prod:
+    deploy_activity:
+      name: duplo-kat-kit
+      kwargs:
+        stage: prod
+        tenant_id: 190dcd69-a8c2-4922-a513-dd550ec201b1
+        deploy_only: false
+    status_checks:
+      - duplo-kat-kit: null
+    on_failure:
+      transition_state: null
+    on_success:
+      transition_state: EndState
+initial_state: CodeReviewState
+merged_state: ManualGateState
